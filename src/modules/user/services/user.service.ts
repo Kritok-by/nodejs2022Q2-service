@@ -34,7 +34,6 @@ export class UserService {
   async update(id: Id, updatePasswordDto: UpdatePasswordDto): Promise<User> {
     const { oldPassword, newPassword } = { ...updatePasswordDto };
     const oldItem = DataBase.getById(id, 'users');
-    console.log(updatePasswordDto);
 
     if (oldItem?.password === newPassword)
       throw new ForbiddenException(
