@@ -1,0 +1,19 @@
+# GET http://localhost:4000/user
+
+# POST http://localhost:4000/user
+# content-type: application/json
+
+# {
+#   "login": "art",
+#   "password": "123"
+# }
+
+# GET http://localhost:4000/user/c67627cb-bfd5-4d89-bceb-9e51c0d247e5
+
+PUT http://localhost:4000/user/c00a0376-da0f-444f-9e49-ad8a5c43e6b7
+content-type: application/json
+
+{
+  "oldPassword": "123",
+  "newPassword": "1234"
+}
