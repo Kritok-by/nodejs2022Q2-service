@@ -1,4 +1,8 @@
 import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { Album } from 'src/modules/album/schemas/album.schema';
+import { Artist } from 'src/modules/artist/schemas/artist.schema';
+import { Track } from 'src/modules/track/schemas/track.schema';
+import { User } from 'src/modules/user/schemas/user.schema';
 
 import { validate as uuidValidate, version as uuidVersion } from 'uuid';
 
@@ -7,49 +11,19 @@ export const uuidValidateV4 = (uuid: string): boolean =>
 
 export type Id = string;
 
-interface IUser {
-  id: Id; // uuid v4
-  login: string;
-  password: string;
-  version: number; // integer number, increments on update
-  createdAt: number; // timestamp of creation
-  updatedAt: number; // timestamp of last update
-}
+type ItemType = User | Artist | Track | Album;
 
-interface IArtist {
-  id: Id; // uuid v4
-  name: string;
-  grammy: boolean;
+export interface IFavorites {
+  artists: Id[];
+  albums: Id[];
+  tracks: Id[];
 }
-
-interface ITrack {
-  id: Id; // uuid v4
-  name: string;
-  artistId: string | null; // refers to Artist
-  albumId: string | null; // refers to Album
-  duration: number; // integer number
-}
-
-interface IAlbum {
-  id: Id; // uuid v4
-  name: string;
-  year: number;
-  artistId: string | null; // refers to Artist
-}
-
-interface IFavorites {
-  artists: string[]; // favorite artists ids
-  albums: string[]; // favorite albums ids
-  tracks: string[]; // favorite tracks ids
-}
-
-type ItemType = IUser | IArtist | ITrack | IAlbum;
 
 class DataBase {
-  users: IUser[] = [];
-  artists: IArtist[] = [];
-  tracks: ITrack[] = [];
-  albums: IAlbum[] = [];
+  users: User[] = [];
+  artists: Artist[] = [];
+  tracks: Track[] = [];
+  albums: Album[] = [];
   favorites: IFavorites = {
     artists: [],
     albums: [],
@@ -68,6 +42,8 @@ class DataBase {
 
     return item;
   };
+
+  updateFavorites = (favorites: IFavorites) => (this.favorites = favorites);
 
   createItem = (item: ItemType, table: string) => this[table]?.push(item);
 
