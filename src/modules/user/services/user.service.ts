@@ -35,13 +35,8 @@ export class UserService {
     const { oldPassword, newPassword } = { ...updatePasswordDto };
     const oldItem = DataBase.getById(id, 'users');
 
-    if (oldItem?.password === newPassword)
-      throw new ForbiddenException(
-        'old password and new password doesnt be match',
-      );
-
-    if (oldItem?.password !== oldPassword)
-      throw new ForbiddenException('old password doesnt match');
+    if (oldItem?.password === newPassword || oldItem?.password !== oldPassword)
+      throw new ForbiddenException('oldPassowrd is wrong');
 
     const newItem = {
       ...oldItem,

@@ -30,9 +30,7 @@ export class FavoritesService {
     } catch (err) {
       console.log(err);
       if (err.status === 404) {
-        throw new UnprocessableEntityException(
-          `${type} - ${id} does not exist`,
-        );
+        throw new UnprocessableEntityException(`Not found`);
       }
 
       throw err;

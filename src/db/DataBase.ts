@@ -34,11 +34,11 @@ class DataBase {
 
   getById = (id: Id, table: string) => {
     if (!uuidValidateV4(id))
-      throw new BadRequestException(`Ooops, "${id}" is invalid (not uuid)!`);
+      throw new BadRequestException(`Bad request. Id is invalid (not uuid)`);
 
     const item = this[table]?.find((item: ItemType) => item.id === id);
 
-    if (!item) throw new NotFoundException(`Does not exist!`);
+    if (!item) throw new NotFoundException(`Not found`);
 
     return item;
   };
@@ -49,13 +49,11 @@ class DataBase {
 
   putItem = (item: ItemType, table: string) => {
     if (!uuidValidateV4(item.id))
-      throw new BadRequestException(
-        `Ooops, "${item.id}" is invalid (not uuid)!`,
-      );
+      throw new BadRequestException(`Bad request. Id is invalid (not uuid)`);
 
     const elem = this[table].find((i: ItemType) => item.id === i.id);
 
-    if (!elem) throw new NotFoundException(`Does not exist!`);
+    if (!elem) throw new NotFoundException(`Not found`);
 
     this[table] = this[table].map((i: ItemType) =>
       i.id === item.id ? item : i,
@@ -64,11 +62,11 @@ class DataBase {
 
   deleteItem = (id: Id, table: string) => {
     if (!uuidValidateV4(id))
-      throw new BadRequestException(`Ooops, "${id}" is invalid (not uuid)!`);
+      throw new BadRequestException(`Bad request. Id is invalid (not uuid)`);
 
     const item = this[table].find((item: ItemType) => item.id === id);
 
-    if (!item) throw new NotFoundException(`Does not exist!`);
+    if (!item) throw new NotFoundException(`Not found`);
 
     this[table] = this[table]?.filter((item: ItemType) => item.id !== id);
 
