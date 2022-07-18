@@ -1,0 +1,19 @@
+# GET http://localhost:4000/album
+
+# POST http://localhost:4000/favs/album/675dc67d-c317-4d95-9af1-eafc616dac65
+# content-type: application/json
+
+# {
+#   "login": "art",
+#   "password": "123"
+# }
+
+GET http://localhost:4000/favs
+
+# PUT http://localhost:4000/user/c00a0376-da0f-444f-9e49-ad8a5c43e6b7
+# content-type: application/json
+
+# {
+#   "oldPassword": "123",
+#   "newPassword": "1234"
+# }
