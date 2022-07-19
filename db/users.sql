@@ -1,0 +1,8 @@
+CREATE TABLE users (
+  id VARCHAR(64) NOT NULL,
+  login VARCHAR(128) NOT NULL,
+  password VARCHAR(128) NOT NULL,
+  version INTEGER DEFAULT 1,
+  createdAt DATETIME NOT NULL,
+  updatedAt DATETIME NOT NULL
+)
