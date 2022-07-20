@@ -1,12 +1,10 @@
-import { Exclude } from 'class-transformer';
-import { Id } from 'src/db/DataBase';
+import { Id } from 'src/utils/types';
 
 export class User {
   id: Id;
   login: string;
 
-  @Exclude()
-  password: string;
+  password?: string;
 
   version: number;
   createdAt: number;

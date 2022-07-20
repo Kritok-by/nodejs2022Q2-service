@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
 } from '@nestjs/common';
@@ -20,8 +21,8 @@ export class UserController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  getById(@Param() params): Promise<User> {
-    return this.userService.findOne(params.id);
+  getById(@Param('id', new ParseUUIDPipe({ version: '4' })) id): Promise<User> {
+    return this.userService.findOne(id);
   }
 
   @Get()
@@ -41,11 +42,11 @@ export class UserController {
   @Put(':id')
   @HttpCode(HttpStatus.OK)
   async update(
-    @Param() params,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ): Promise<User> {
     const user = {
-      ...(await this.userService.update(params.id, updatePasswordDto)),
+      ...(await this.userService.update(id, updatePasswordDto)),
     };
     delete user.password;
     return user;
@@ -53,7 +54,7 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  delete(@Param() params): Promise<User> {
-    return this.userService.delete(params.id);
+  delete(@Param('id', new ParseUUIDPipe({ version: '4' })) id): Promise<User> {
+    return this.userService.delete(id);
   }
 }

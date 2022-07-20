@@ -5,8 +5,10 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
+import { Id } from 'src/utils/types';
 import { Favorites } from './schemas/favorites.schema';
 import { FavoritesService } from './services/favorites.service';
 
@@ -22,37 +24,49 @@ export class FavoritesController {
 
   @Delete('track/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteTrack(@Param() params): Promise<Favorites> {
-    return this.favoritesService.delete(params.id, 'tracks');
+  deleteTrack(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id,
+  ): Promise<{ id: Id }> {
+    return this.favoritesService.delete(id, 'tracks');
   }
 
   @Post('track/:id')
   @HttpCode(HttpStatus.CREATED)
-  addTrack(@Param() params): Promise<Favorites> {
-    return this.favoritesService.add(params.id, 'tracks');
+  addTrack(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id,
+  ): Promise<{ id: Id }> {
+    return this.favoritesService.add(id, 'tracks');
   }
 
   @Delete('album/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteAlbum(@Param() params): Promise<Favorites> {
-    return this.favoritesService.delete(params.id, 'albums');
+  deleteAlbum(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id,
+  ): Promise<{ id: Id }> {
+    return this.favoritesService.delete(id, 'albums');
   }
 
   @Post('album/:id')
   @HttpCode(HttpStatus.CREATED)
-  addAlbum(@Param() params): Promise<Favorites> {
-    return this.favoritesService.add(params.id, 'albums');
+  addAlbum(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id,
+  ): Promise<{ id: Id }> {
+    return this.favoritesService.add(id, 'albums');
   }
 
   @Delete('artist/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteArtist(@Param() params): Promise<Favorites> {
-    return this.favoritesService.delete(params.id, 'artists');
+  deleteArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id,
+  ): Promise<{ id: Id }> {
+    return this.favoritesService.delete(id, 'artists');
   }
 
   @Post('artist/:id')
   @HttpCode(HttpStatus.CREATED)
-  addArtist(@Param() params): Promise<Favorites> {
-    return this.favoritesService.add(params.id, 'artists');
+  addArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id,
+  ): Promise<{ id: Id }> {
+    return this.favoritesService.add(id, 'artists');
   }
 }

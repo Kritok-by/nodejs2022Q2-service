@@ -1,57 +1,73 @@
 import { Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
-import DataBase, { Id } from 'src/db/DataBase';
 import { Album } from '../schemas/album.schema';
 import { CreateAlbumDto } from '../dto/create-album.dto';
 import { UpdateAlbumDto } from '../dto/update-album.dto';
-import { Track } from 'src/modules/track/schemas/track.schema';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { NotFoundHandler } from 'src/utils/errorHandlers';
+import { Id } from 'src/utils/types';
+import { FavoritesService } from 'src/modules/favorites/services/favorites.service';
 
 @Injectable()
 export class AlbumService {
-  findOne(id: Id): Promise<Album> {
-    return DataBase.getById(id, 'albums');
+  constructor(private prisma: PrismaService) {}
+
+  async findOne(id: Id): Promise<Album> {
+    try {
+      return await this.prisma.album.findFirst({
+        where: { id },
+      });
+    } catch {
+      NotFoundHandler('Album', id);
+    }
   }
 
-  findAll(): Promise<Album[]> {
-    return DataBase.getAll('albums');
+  async findAll(): Promise<Album[]> {
+    return await this.prisma.album.findMany();
   }
 
   async create(createAlbumDto: CreateAlbumDto): Promise<Album> {
-    const newItem: Album = {
-      ...createAlbumDto,
-      id: v4(),
-    };
-    DataBase.createItem(newItem, 'albums');
-    return newItem;
+    return await this.prisma.album.create({
+      data: {
+        ...createAlbumDto,
+        id: v4(),
+      },
+    });
   }
 
   async delete(id: Id): Promise<Album> {
-    const item = DataBase.deleteItem(id, 'albums');
-    const tracks = DataBase.getAll('tracks');
-    const favorites = DataBase.getAll('favorites');
+    try {
+      const res = await this.prisma.album.delete({
+        where: { id },
+      });
 
-    tracks.forEach((track: Track) => {
-      if (track?.albumId === id) {
-        DataBase.putItem({ ...track, albumId: null }, 'tracks');
-      }
-    });
+      await this.prisma.track.updateMany({
+        where: {
+          albumId: id,
+        },
+        data: {
+          albumId: null,
+        },
+      });
 
-    favorites.albums = favorites.albums.filter((albumId: Id) => id !== albumId);
-    DataBase.updateFavorites(favorites);
+      // await this.favorites.delete(id, 'albums');
 
-    return item;
+      return res;
+    } catch {
+      NotFoundHandler('Album', id);
+    }
   }
 
   async update(id: Id, updateAlbumDto: UpdateAlbumDto): Promise<Album> {
-    const oldItem = DataBase.getById(id, 'albums');
-
-    const newItem = {
-      ...oldItem,
-      ...updateAlbumDto,
-    };
-
-    DataBase.putItem(newItem, 'albums');
-
-    return newItem;
+    try {
+      return await this.prisma.album.update({
+        where: {
+          id: id,
+        },
+        data: { ...updateAlbumDto },
+      });
+    } catch {
+      NotFoundHandler('Album', id);
+    }
   }
 }
