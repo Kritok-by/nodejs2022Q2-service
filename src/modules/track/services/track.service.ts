@@ -6,14 +6,18 @@ import { UpdateTrackDto } from '../dto/update-track.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { NotFoundHandler } from 'src/utils/errorHandlers';
 import { Id } from 'src/utils/types';
+import { FavoritesService } from 'src/modules/favorites/services/favorites.service';
 
 @Injectable()
 export class TrackService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private favorites: FavoritesService,
+  ) {}
 
   async findOne(id: Id): Promise<Track> {
     try {
-      return await this.prisma.track.findFirst({
+      return await this.prisma.track.findUniqueOrThrow({
         where: { id },
       });
     } catch {
@@ -40,25 +44,7 @@ export class TrackService {
         where: { id },
       });
 
-      await this.prisma.track.updateMany({
-        where: {
-          artistId: id,
-        },
-        data: {
-          artistId: null,
-        },
-      });
-
-      await this.prisma.album.updateMany({
-        where: {
-          artistId: id,
-        },
-        data: {
-          artistId: null,
-        },
-      });
-
-      /// favorites update
+      await this.favorites.delete(id, 'tracks');
 
       return res;
     } catch {

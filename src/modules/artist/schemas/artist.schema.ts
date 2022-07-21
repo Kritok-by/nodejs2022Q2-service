@@ -1,4 +1,4 @@
-import { Id } from 'src/db/DataBase';
+import { Id } from 'src/utils/types';
 
 export class Artist {
   id: Id; // uuid v4

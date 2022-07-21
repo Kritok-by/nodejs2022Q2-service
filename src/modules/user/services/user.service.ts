@@ -17,7 +17,7 @@ export class UserService {
 
   async findOne(id: Id): Promise<User> {
     try {
-      return await this.prisma.user.findFirst({
+      return await this.prisma.user.findUniqueOrThrow({
         where: { id },
         select: {
           id: true,
@@ -82,17 +82,17 @@ export class UserService {
     const newPasswordHash = hashPWD(newPassword);
     let user: User;
     try {
-      user = await this.prisma.user.findUnique({
+      user = await this.prisma.user.findUniqueOrThrow({
         where: { id },
       });
     } catch {
       NotFoundHandler('User', id);
     }
 
-    if (user.password !== hashPWD(oldPassword))
+    if (user?.password !== hashPWD(oldPassword))
       throw new ForbiddenException('old passowrd is wrong');
 
-    if (user.password === newPasswordHash) {
+    if (user?.password === newPasswordHash) {
       throw new ForbiddenException('new passowrd is same as old password');
     }
 

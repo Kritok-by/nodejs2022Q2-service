@@ -1,7 +1,4 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { AlbumService } from 'src/modules/album/services/album.service';
-import { ArtistService } from 'src/modules/artist/services/artist.service';
-import { TrackService } from 'src/modules/track/services/track.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Id } from 'src/utils/types';
 import { Favorites } from '../schemas/favorites.schema';
@@ -11,34 +8,12 @@ type favsFields = 'artists' | 'albums' | 'tracks';
 @Injectable()
 export class FavoritesService {
   id = 0;
-  constructor(
-    private prisma: PrismaService,
-    private artists: ArtistService,
-    private albums: AlbumService,
-    private tracks: TrackService,
-  ) {
+  constructor(private prisma: PrismaService) {
     this.initFavs();
   }
 
-  private async initFavs() {
-    try {
-      await this.prisma.favorites.findFirstOrThrow({
-        where: { id: 0 },
-      });
-    } catch {
-      await this.prisma.favorites.create({
-        data: {
-          id: 0,
-          artists: [],
-          albums: [],
-          tracks: [],
-        },
-      });
-    }
-  }
-
   async get(): Promise<Favorites> {
-    const favorites = await this.prisma.favorites.findFirst({
+    const favorites = await this.prisma.favorites.findUnique({
       where: { id: 0 },
       select: {
         id: false,
@@ -49,24 +24,19 @@ export class FavoritesService {
     });
 
     const resultArr = await Promise.all(
-      Object.entries(favorites).map(async ([key, value]) => [
-        key,
-        await Promise.all(value.map((id: Id) => this[key].findOne(id))),
-      ]),
+      Object.entries(favorites).map(
+        async ([key, value]: [favsFields, Id[]]) => [
+          key,
+          await Promise.all(value.map((id: Id) => this.getTypeById(id, key))),
+        ],
+      ),
     );
 
     return Object.fromEntries(resultArr);
   }
 
   async add(id: Id, type: favsFields): Promise<{ id: Id }> {
-    try {
-      await this[type].findOne(id);
-    } catch {
-      throw new UnprocessableEntityException(
-        `id - '${id}' not found in ${type}`,
-      );
-    }
-
+    await this.getTypeById(id, type);
     await this.prisma.favorites.update({
       where: {
         id: 0,
@@ -82,7 +52,7 @@ export class FavoritesService {
   }
 
   async delete(id: Id, type: favsFields): Promise<{ id: Id }> {
-    const { [type]: oldData } = await this.prisma.favorites.findFirst({
+    const { [type]: oldData } = await this.prisma.favorites.findUniqueOrThrow({
       where: { id: 0 },
     });
 
@@ -96,5 +66,38 @@ export class FavoritesService {
     });
 
     return { id };
+  }
+
+  // inclass services
+
+  private async initFavs() {
+    try {
+      await this.prisma.favorites.findUniqueOrThrow({
+        where: { id: 0 },
+      });
+    } catch {
+      await this.prisma.favorites.create({
+        data: {
+          id: 0,
+          artists: [],
+          albums: [],
+          tracks: [],
+        },
+      });
+    }
+  }
+
+  private async getTypeById(id: Id, type: favsFields) {
+    const customType = type.slice(0, -1);
+
+    try {
+      return await this.prisma[customType].findUniqueOrThrow({
+        where: { id },
+      });
+    } catch {
+      throw new UnprocessableEntityException(
+        `id - '${id}' not found in ${type}`,
+      );
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Id } from 'src/db/DataBase';
+import { Id } from 'src/utils/types';
 
 export interface Album {
   id: Id; // uuid v4

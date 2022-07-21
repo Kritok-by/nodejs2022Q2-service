@@ -10,11 +10,14 @@ import { FavoritesService } from 'src/modules/favorites/services/favorites.servi
 
 @Injectable()
 export class AlbumService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private favorites: FavoritesService,
+  ) {}
 
   async findOne(id: Id): Promise<Album> {
     try {
-      return await this.prisma.album.findFirst({
+      return await this.prisma.album.findUniqueOrThrow({
         where: { id },
       });
     } catch {
@@ -50,7 +53,7 @@ export class AlbumService {
         },
       });
 
-      // await this.favorites.delete(id, 'albums');
+      await this.favorites.delete(id, 'albums');
 
       return res;
     } catch {
