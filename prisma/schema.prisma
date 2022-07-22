@@ -1,6 +1,5 @@
-
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["linux-musl"]
 }
 
@@ -10,43 +9,44 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(uuid())
+  id        String @id @default(uuid())
   createdAt Int
   updatedAt Int
-  login String @unique
+  login     String @unique
   password  String
-  version Int @default(1)
-  @@map("users")
+  version   Int    @default(1)
 }
 
 model Track {
-  id String     @id @default(uuid())
-  name String
-  artistId String?
-  albumId String?
-  duration Int
-  @@map("tracks")
+  id          String     @id @default(uuid())
+  name        String
+  artistId    String?
+  albumId     String?
+  duration    Int
+  Favorites   Favorites? @relation(fields: [favoritesId], references: [id])
+  favoritesId Int?
 }
 
 model Artist {
-  id String     @id @default(uuid())
-  name String
-  grammy Boolean    @default(false)
-  @@map("artists")
+  id          String     @id @default(uuid())
+  name        String
+  grammy      Boolean    @default(false)
+  Favorites   Favorites? @relation(fields: [favoritesId], references: [id])
+  favoritesId Int?
 }
 
 model Album {
-  id String     @id @default(uuid())
-  name String
-  artistId String?
-  year Int
-  @@map("albums")
+  id          String     @id @default(uuid())
+  name        String
+  artistId    String?
+  year        Int
+  Favorites   Favorites? @relation(fields: [favoritesId], references: [id])
+  favoritesId Int?
 }
 
 model Favorites {
-  id Int     @id @default(0)
-  artists String[]
-  albums String[]
-  tracks String[]
-  @@map("favorites")
+  id      Int      @id @default(0)
+  artists Artist[]
+  albums  Album[]
+  tracks  Track[]
 }

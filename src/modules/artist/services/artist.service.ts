@@ -6,14 +6,10 @@ import { UpdateArtistDto } from '../dto/update-artist.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { NotFoundHandler } from 'src/utils/errorHandlers';
 import { Id } from 'src/utils/types';
-import { FavoritesService } from 'src/modules/favorites/services/favorites.service';
 
 @Injectable()
 export class ArtistService {
-  constructor(
-    private prisma: PrismaService,
-    private favorites: FavoritesService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async findOne(id: Id): Promise<Artist> {
     try {
@@ -61,8 +57,6 @@ export class ArtistService {
           artistId: null,
         },
       });
-
-      await this.favorites.delete(id, 'artists');
 
       return res;
     } catch {

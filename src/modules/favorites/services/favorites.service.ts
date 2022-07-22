@@ -1,5 +1,6 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { NotFoundHandler } from 'src/utils/errorHandlers';
 import { Id } from 'src/utils/types';
 import { Favorites } from '../schemas/favorites.schema';
 
@@ -16,56 +17,73 @@ export class FavoritesService {
     const favorites = await this.prisma.favorites.findUnique({
       where: { id: 0 },
       select: {
-        id: false,
-        artists: true,
-        albums: true,
-        tracks: true,
-      },
-    });
-
-    const resultArr = await Promise.all(
-      Object.entries(favorites).map(
-        async ([key, value]: [favsFields, Id[]]) => [
-          key,
-          await Promise.all(value.map((id: Id) => this.getTypeById(id, key))),
-        ],
-      ),
-    );
-
-    return Object.fromEntries(resultArr);
-  }
-
-  async add(id: Id, type: favsFields): Promise<{ id: Id }> {
-    await this.getTypeById(id, type);
-    await this.prisma.favorites.update({
-      where: {
-        id: 0,
-      },
-      data: {
-        [type]: {
-          push: id,
+        artists: {
+          select: {
+            id: true,
+            name: true,
+            grammy: true,
+            favoritesId: false,
+          },
+        },
+        albums: {
+          select: {
+            id: true,
+            name: true,
+            artistId: true,
+            year: true,
+            favoritesId: false,
+          },
+        },
+        tracks: {
+          select: {
+            id: true,
+            name: true,
+            artistId: true,
+            albumId: true,
+            duration: true,
+            favoritesId: false,
+          },
         },
       },
     });
 
-    return { id };
+    return favorites;
+  }
+
+  async add(id: Id, type: favsFields): Promise<{ id: Id }> {
+    const customType = type.slice(0, -1);
+    try {
+      await this.prisma[customType].update({
+        where: {
+          id: id,
+        },
+        data: {
+          favoritesId: 0,
+        },
+      });
+      return { id };
+    } catch (err) {
+      throw new UnprocessableEntityException(
+        `id - '${id}' not found in ${type}`,
+      );
+    }
   }
 
   async delete(id: Id, type: favsFields): Promise<{ id: Id }> {
-    const { [type]: oldData } = await this.prisma.favorites.findUniqueOrThrow({
-      where: { id: 0 },
-    });
-
-    await this.prisma.favorites.update({
-      where: {
-        id: 0,
-      },
-      data: {
-        [type]: oldData.filter((typeId) => typeId !== id),
-      },
-    });
-
-    return { id };
+    const customType = type.slice(0, -1);
+    try {
+      await this.prisma[customType].update({
+        where: {
+          id: id,
+        },
+        data: {
+          favoritesId: null,
+        },
+      });
+      return { id };
+    } catch (err) {
+      NotFoundHandler(customType, id);
+    }
   }
 
   // inclass services
@@ -79,25 +97,8 @@ export class FavoritesService {
       await this.prisma.favorites.create({
         data: {
           id: 0,
-          artists: [],
-          albums: [],
-          tracks: [],
         },
       });
-    }
-  }
-
-  private async getTypeById(id: Id, type: favsFields) {
-    const customType = type.slice(0, -1);
-
-    try {
-      return await this.prisma[customType].findUniqueOrThrow({
-        where: { id },
-      });
-    } catch {
-      throw new UnprocessableEntityException(
-        `id - '${id}' not found in ${type}`,
-      );
     }
   }
 }

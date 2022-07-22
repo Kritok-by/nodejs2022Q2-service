@@ -40,13 +40,9 @@ export class TrackService {
 
   async delete(id: Id): Promise<Track> {
     try {
-      const res = await this.prisma.track.delete({
+      return await this.prisma.track.delete({
         where: { id },
       });
-
-      await this.favorites.delete(id, 'tracks');
-
-      return res;
     } catch {
       NotFoundHandler('Track', id);
     }
