@@ -22,7 +22,6 @@ export class FavoritesService {
             id: true,
             name: true,
             grammy: true,
-            favoritesId: false,
           },
         },
         albums: {
@@ -31,7 +30,6 @@ export class FavoritesService {
             name: true,
             artistId: true,
             year: true,
-            favoritesId: false,
           },
         },
         tracks: {
@@ -41,7 +39,6 @@ export class FavoritesService {
             artistId: true,
             albumId: true,
             duration: true,
-            favoritesId: false,
           },
         },
       },
@@ -96,7 +93,7 @@ export class FavoritesService {
     } catch {
       await this.prisma.favorites.create({
         data: {
-          id: 0,
+          id: null,
         },
       });
     }

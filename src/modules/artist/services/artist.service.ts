@@ -36,29 +36,9 @@ export class ArtistService {
 
   async delete(id: Id): Promise<Artist> {
     try {
-      const res = await this.prisma.artist.delete({
+      return await this.prisma.artist.delete({
         where: { id },
       });
-
-      await this.prisma.track.updateMany({
-        where: {
-          artistId: id,
-        },
-        data: {
-          artistId: null,
-        },
-      });
-
-      await this.prisma.album.updateMany({
-        where: {
-          artistId: id,
-        },
-        data: {
-          artistId: null,
-        },
-      });
-
-      return res;
     } catch {
       NotFoundHandler('Artist', id);
     }

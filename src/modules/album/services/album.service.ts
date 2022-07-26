@@ -36,20 +36,9 @@ export class AlbumService {
 
   async delete(id: Id): Promise<Album> {
     try {
-      const res = await this.prisma.album.delete({
+      return await this.prisma.album.delete({
         where: { id },
       });
-
-      await this.prisma.track.updateMany({
-        where: {
-          albumId: id,
-        },
-        data: {
-          albumId: null,
-        },
-      });
-
-      return res;
     } catch {
       NotFoundHandler('Album', id);
     }

@@ -1,37 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `albums` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `artists` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `favorites` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `tracks` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `users` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "albums" DROP CONSTRAINT "albums_favoritesId_fkey";
-
--- DropForeignKey
-ALTER TABLE "artists" DROP CONSTRAINT "artists_favoritesId_fkey";
-
--- DropForeignKey
-ALTER TABLE "tracks" DROP CONSTRAINT "tracks_favoritesId_fkey";
-
--- DropTable
-DROP TABLE "albums";
-
--- DropTable
-DROP TABLE "artists";
-
--- DropTable
-DROP TABLE "favorites";
-
--- DropTable
-DROP TABLE "tracks";
-
--- DropTable
-DROP TABLE "users";
-
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -91,7 +57,16 @@ CREATE UNIQUE INDEX "User_login_key" ON "User"("login");
 ALTER TABLE "Track" ADD CONSTRAINT "Track_favoritesId_fkey" FOREIGN KEY ("favoritesId") REFERENCES "Favorites"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Track" ADD CONSTRAINT "Track_artistId_fkey" FOREIGN KEY ("artistId") REFERENCES "Artist"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Track" ADD CONSTRAINT "Track_albumId_fkey" FOREIGN KEY ("albumId") REFERENCES "Album"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Artist" ADD CONSTRAINT "Artist_favoritesId_fkey" FOREIGN KEY ("favoritesId") REFERENCES "Favorites"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Album" ADD CONSTRAINT "Album_favoritesId_fkey" FOREIGN KEY ("favoritesId") REFERENCES "Favorites"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Album" ADD CONSTRAINT "Album_artistId_fkey" FOREIGN KEY ("artistId") REFERENCES "Artist"("id") ON DELETE SET NULL ON UPDATE CASCADE;
