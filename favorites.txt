@@ -1,5 +1,0 @@
-CREATE TABLE favorites (
-  artists VARCHAR(64)[] DEFAULT [],
-  albums VARCHAR(64)[] DEFAULT [],
-  tracks VARCHAR(64)[] DEFAULT [],
-)

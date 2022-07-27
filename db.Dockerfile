@@ -1,4 +1,5 @@
 FROM postgres:alpine
+# ENV PORT 5432
+# EXPOSE $PORT
 
-#COPY ./db/*.sql /docker-entrypoint-initdb.d/
-# RUN chmod a+r /docker-entrypoint-initdb.d/*
+# COPY /prisma/migrations/**/*.sql /docker-entrypoint-initdb.d/

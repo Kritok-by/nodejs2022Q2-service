@@ -1,68 +1,59 @@
 import { Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
-import DataBase, { Id } from 'src/db/DataBase';
 import { Artist } from '../schemas/artist.schema';
 import { CreateArtistDto } from '../dto/create-artist.dto';
 import { UpdateArtistDto } from '../dto/update-artist.dto';
-import { Track } from 'src/modules/track/schemas/track.schema';
-import { Album } from 'src/modules/album/schemas/album.schema';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { NotFoundHandler } from 'src/utils/errorHandlers';
+import { Id } from 'src/utils/types';
 
 @Injectable()
 export class ArtistService {
-  findOne(id: Id): Promise<Artist> {
-    return DataBase.getById(id, 'artists');
+  constructor(private prisma: PrismaService) {}
+
+  async findOne(id: Id): Promise<Artist> {
+    try {
+      return await this.prisma.artist.findUniqueOrThrow({
+        where: { id },
+      });
+    } catch {
+      NotFoundHandler('Artist', id);
+    }
   }
 
-  findAll(): Promise<Artist[]> {
-    return DataBase.getAll('artists');
+  async findAll(): Promise<Artist[]> {
+    return await this.prisma.artist.findMany();
   }
 
   async create(createArtistDto: CreateArtistDto): Promise<Artist> {
-    const newItem: Artist = {
-      ...createArtistDto,
-      id: v4(),
-    };
-    DataBase.createItem(newItem, 'artists');
-    return newItem;
+    return await this.prisma.artist.create({
+      data: {
+        ...createArtistDto,
+        id: v4(),
+      },
+    });
   }
 
   async delete(id: Id): Promise<Artist> {
-    const item = DataBase.deleteItem(id, 'artists');
-    const tracks = DataBase.getAll('tracks');
-    const albums = DataBase.getAll('albums');
-    const favorites = DataBase.getAll('favorites');
-
-    tracks.forEach((track: Track) => {
-      if (track?.artistId === id) {
-        DataBase.putItem({ ...track, artistId: null }, 'tracks');
-      }
-    });
-
-    albums.forEach((album: Album) => {
-      if (album?.artistId === id) {
-        DataBase.putItem({ ...album, artistId: null }, 'albums');
-      }
-    });
-
-    favorites.artists = favorites.artists.filter(
-      (artistId: Id) => id !== artistId,
-    );
-
-    DataBase.updateFavorites(favorites);
-
-    return item;
+    try {
+      return await this.prisma.artist.delete({
+        where: { id },
+      });
+    } catch {
+      NotFoundHandler('Artist', id);
+    }
   }
 
   async update(id: Id, updateArtistDto: UpdateArtistDto): Promise<Artist> {
-    const oldItem = DataBase.getById(id, 'artists');
-
-    const newItem = {
-      ...oldItem,
-      ...updateArtistDto,
-    };
-
-    DataBase.putItem(newItem, 'artists');
-
-    return newItem;
+    try {
+      return await this.prisma.artist.update({
+        where: {
+          id: id,
+        },
+        data: { ...updateArtistDto },
+      });
+    } catch {
+      NotFoundHandler('Artist', id);
+    }
   }
 }

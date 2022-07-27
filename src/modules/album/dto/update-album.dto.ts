@@ -1,5 +1,5 @@
 import { IsNumber, IsString, IsUUID, ValidateIf } from 'class-validator';
-import { Id } from 'src/db/DataBase';
+import { Id } from 'src/utils/types';
 
 export class UpdateAlbumDto {
   @IsString()

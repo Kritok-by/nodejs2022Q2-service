@@ -1,49 +1,63 @@
 import { Injectable } from '@nestjs/common';
 import { v4 } from 'uuid';
-import DataBase, { Id } from 'src/db/DataBase';
 import { Track } from '../schemas/track.schema';
 import { CreateTrackDto } from '../dto/create-track.dto';
 import { UpdateTrackDto } from '../dto/update-track.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { NotFoundHandler } from 'src/utils/errorHandlers';
+import { Id } from 'src/utils/types';
+import { FavoritesService } from 'src/modules/favorites/services/favorites.service';
 
 @Injectable()
 export class TrackService {
-  findOne(id: Id): Promise<Track> {
-    return DataBase.getById(id, 'tracks');
+  constructor(
+    private prisma: PrismaService,
+    private favorites: FavoritesService,
+  ) {}
+
+  async findOne(id: Id): Promise<Track> {
+    try {
+      return await this.prisma.track.findUniqueOrThrow({
+        where: { id },
+      });
+    } catch {
+      NotFoundHandler('Track', id);
+    }
   }
 
-  findAll(): Promise<Track[]> {
-    return DataBase.getAll('tracks');
+  async findAll(): Promise<Track[]> {
+    return await this.prisma.track.findMany();
   }
 
   async create(createTrackDto: CreateTrackDto): Promise<Track> {
-    const newItem: Track = {
-      ...createTrackDto,
-      id: v4(),
-    };
-    DataBase.createItem(newItem, 'tracks');
-    return newItem;
+    return await this.prisma.track.create({
+      data: {
+        ...createTrackDto,
+        id: v4(),
+      },
+    });
   }
 
   async delete(id: Id): Promise<Track> {
-    const track = DataBase.deleteItem(id, 'tracks');
-    const favorites = DataBase.getAll('favorites');
-
-    favorites.tracks = favorites.tracks.filter((tarckId: Id) => id !== tarckId);
-    DataBase.updateFavorites(favorites);
-
-    return track;
+    try {
+      return await this.prisma.track.delete({
+        where: { id },
+      });
+    } catch {
+      NotFoundHandler('Track', id);
+    }
   }
 
   async update(id: Id, updateTrackDto: UpdateTrackDto): Promise<Track> {
-    const oldItem = DataBase.getById(id, 'tracks');
-
-    const newItem = {
-      ...oldItem,
-      ...updateTrackDto,
-    };
-
-    DataBase.putItem(newItem, 'tracks');
-
-    return newItem;
+    try {
+      return await this.prisma.track.update({
+        where: {
+          id: id,
+        },
+        data: { ...updateTrackDto },
+      });
+    } catch {
+      NotFoundHandler('Artist', id);
+    }
   }
 }
